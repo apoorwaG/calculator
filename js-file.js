@@ -11,6 +11,24 @@ function multiply(a, b){
 }
 
 function divide(a, b){
+
+    if(b === 0) {
+        const a = "Quite impossible!";
+        const b = "Not going to do that.";
+        const c = "Try doing that yourself!";
+        const choices = [a, b, c];
+        let choice = Math.floor(Math.random() * 3);
+        switch(choice){
+            case 0:
+                return choices[0];
+            case 1:
+                return choices[1];
+            default:
+                return choices[2];
+
+        }
+
+    } 
     return a/b;
 }
 
@@ -45,7 +63,9 @@ function clearDisplay(){
     expression.operator = "";
     expression.operandA = "";
     expression.operandB = "";
-    toggleDecimalButton();
+    allButtons.forEach(button => {
+        button.disabled = false;
+    });
 }
 
 function toggleDecimalButton() {
@@ -65,26 +85,22 @@ function setOperand(event) {
     }
 }
 
-function buildOperation(event) {
-    if(!expression.operandA || (expression.operator && !expression.operandB)) {
-        console.log("adieu");
-        return;
-    }
-    if(!expression.operandB){
-        // still building the expression. update the operator and and the display
-        if(event.target.textContent !== "="){
-            expression.operator = event.target.textContent;
-            display.textContent += ` ${expression.operator} `;
-            toggleDecimalButton();
-        }
-        return;
-    }
-    // at this stage, we have both operands and an operator
-    toggleDecimalButton();
+
+function executeOperation(event){
+    // both operands set. execute operation and update display
     console.log(`Operator: ${expression.operator}, ${expression.operandA}, ${expression.operandB}`);
     const result = operate(expression.operator, +expression.operandA, +expression.operandB);
-    expression.operandA = `${result}`;
 
+    if(typeof result !== "number"){
+        // math error
+        display.textContent = result;
+        allButtons.forEach(button => {
+            button.disabled = true;
+        });
+        clearButton.disabled = false;
+    }
+
+    expression.operandA = `${result}`;
     if(event.target.textContent === "="){
         display.textContent = result;
         expression.operator = "";
@@ -97,6 +113,26 @@ function buildOperation(event) {
     }
 }
 
+function buildExpression(event) {
+    if(!expression.operandA || (expression.operator && !expression.operandB)) {
+        console.log("adieu");
+        return;
+    }
+    if(!expression.operandB){
+        // still building the expression. update the operator  and the display
+        if(event.target.textContent !== "="){
+            expression.operator = event.target.textContent;
+            display.textContent += ` ${expression.operator} `;
+            toggleDecimalButton();
+        }
+        return;
+    }
+    // at this stage, we have both operands and an operator
+    toggleDecimalButton();
+
+    executeOperation(event);
+}
+
 const numberButtons = document.querySelectorAll("button.number");
 numberButtons.forEach((button) => {
     button.addEventListener('click', setOperand);
@@ -104,7 +140,7 @@ numberButtons.forEach((button) => {
 
 const operatorButtons = document.querySelectorAll(".operator");
 operatorButtons.forEach(button => {
-    button.addEventListener('click', buildOperation);
+    button.addEventListener('click', buildExpression);
 });
 
 const clearButton = document.querySelector("button.clear");
@@ -112,3 +148,5 @@ clearButton.addEventListener('click', clearDisplay);
 
 const decimalButton = document.querySelector(".number.decimal");
 decimalButton.addEventListener('click', (event) => event.target.disabled = true);
+
+const allButtons = document.querySelectorAll("button");

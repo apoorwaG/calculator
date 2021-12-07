@@ -75,6 +75,10 @@ function toggleDecimalButton() {
 function deleteKey(event) {
     if(expression.operandB) {
         // user is currently enetering the second operand
+        if(Math.abs(expression.operandB) === Infinity){
+            // reformat display
+            return;
+        }
         display.textContent = display.textContent.slice(0, -1);
         if(expression.operandB.length >= 1){
             expression.operandB = expression.operandB.slice(0, -1);
@@ -83,6 +87,10 @@ function deleteKey(event) {
         display.textContent = display.textContent.slice(0, -3);
         expression.operator = "";
     } else if(expression.operandA && !expression.operator){
+        if(Math.abs(expression.operandA) === Infinity){
+            // reformat display
+            return;
+        }
         display.textContent = display.textContent.slice(0, -1);
         if(expression.operandA.length >= 1){
             expression.operandA = expression.operandA.slice(0, -1);
@@ -100,11 +108,19 @@ function deleteKey(event) {
 function setOperand(event) {
     if(!expression.operator){
         // operandA
-        display.textContent = getDisplayContent() + event.target.textContent;
-        expression.operandA = display.textContent;
+        if(Math.abs(expression.operandA) === Infinity || Math.abs(expression.operandA) > 1e14) return;
+        if(expression.operandA.includes(".") && expression.operandA.length > 8) return;
+
+        let opA = expression.operandA + event.target.textContent;
+        expression.operandA = opA;
+        display.textContent = opA;
+
+
     } else {
         // operator and operandA set
         // this is operandB
+        if(Math.abs(expression.operandB) === Infinity ||  Math.abs(expression.operandB) > 1e14) return;
+        if(expression.operandB.includes(".") && expression.operandB.length > 8) return;
         expression.operandB += event.target.textContent;
         display.textContent += event.target.textContent;
     }
@@ -114,7 +130,8 @@ function setOperand(event) {
 function executeOperation(event){
     // both operands set. execute operation and update display
     console.log(`Operator: ${expression.operator}, ${expression.operandA}, ${expression.operandB}`);
-    const result = operate(expression.operator, +expression.operandA, +expression.operandB);
+    let result = operate(expression.operator, +expression.operandA, +expression.operandB);
+    console.log(result);
 
     if(typeof result !== "number"){
         // math error
@@ -126,7 +143,8 @@ function executeOperation(event){
         return;
     }
 
-    console.log(result.toPrecision(8));
+    if(Math.abs(result) > 10e14) result = result.toPrecision(8);
+    console.log(result);
 
     expression.operandA = `${result}`;
     if(event.target.textContent === "="){

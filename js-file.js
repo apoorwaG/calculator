@@ -72,6 +72,31 @@ function toggleDecimalButton() {
     decimalButton.disabled = false;
 }
 
+function deleteKey(event) {
+    if(expression.operandB) {
+        // user is currently enetering the second operand
+        display.textContent = display.textContent.slice(0, -1);
+        if(expression.operandB.length >= 1){
+            expression.operandB = expression.operandB.slice(0, -1);
+        }
+    } else if(expression.operator && !expression.operandB){
+        display.textContent = display.textContent.slice(0, -3);
+        expression.operator = "";
+    } else if(expression.operandA && !expression.operator){
+        display.textContent = display.textContent.slice(0, -1);
+        if(expression.operandA.length >= 1){
+            expression.operandA = expression.operandA.slice(0, -1);
+            if(expression.operandA === "-"){
+                // if after deleting a key, only the negative remains
+                expression.operandA = "";
+                display.textContent = "";
+            }
+        }
+    } else {
+        console.log("Nothing to delete!");
+    }
+}
+
 function setOperand(event) {
     if(!expression.operator){
         // operandA
@@ -98,7 +123,10 @@ function executeOperation(event){
             button.disabled = true;
         });
         clearButton.disabled = false;
+        return;
     }
+
+    console.log(result.toPrecision(8));
 
     expression.operandA = `${result}`;
     if(event.target.textContent === "="){
@@ -149,4 +177,8 @@ clearButton.addEventListener('click', clearDisplay);
 const decimalButton = document.querySelector(".number.decimal");
 decimalButton.addEventListener('click', (event) => event.target.disabled = true);
 
+const deleteButton = document.querySelector(".delete");
+deleteButton.addEventListener('click', deleteKey);
+
 const allButtons = document.querySelectorAll("button");
+

@@ -15,12 +15,7 @@ body {
     display: flex;
     flex-direction: column;
     row-gap: 10px;
-}
-
-.display, 
-.buttons {
-    /* border: 2px dashed black; */
-    border-radius: 3px;
+    background-color:rgb(243, 215, 182);
 }
 
 .display {
@@ -30,13 +25,15 @@ body {
     flex-wrap: wrap;
     justify-content: flex-end;
     align-items: center;
+    border-radius: 3px;
+    border: 1px solid green;
 }
 .buttons {
     flex: 3 1 0;
     display: flex;
     flex-direction: column;
     row-gap: 14px;
-    padding: 10px;
+    padding: 10px 0px;
 }
 
 .firstRow,
@@ -52,6 +49,7 @@ body {
 .buttons button {
     flex: 1 1 0;
     box-shadow: 0 9px #999;
+    border-radius: 0px;
 }
 
 .buttons button:active {
@@ -69,7 +67,21 @@ body {
 .operator.equal {
     background-color: rgb(143, 235, 143);
 }
+.operator.equal:hover{
+    background-color: rgb(104, 172, 104);
+}
 
 .clear{
     background-color: rgb(248, 156, 156);
+}
+.clear:hover {
+    background-color: rgb(204, 126, 126);
+}
+
+.operator {
+    background-color: rgb(159, 207, 240);
+}
+.operator:hover{
+    background-color: rgb(111, 145, 168);
+
 }

@@ -79,6 +79,7 @@ function deleteKey(event) {
             // reformat display
             return;
         }
+
         display.textContent = display.textContent.slice(0, -1);
         if(expression.operandB.length >= 1){
             expression.operandB = expression.operandB.slice(0, -1);
@@ -91,6 +92,7 @@ function deleteKey(event) {
             // reformat display
             return;
         }
+
         display.textContent = display.textContent.slice(0, -1);
         if(expression.operandA.length >= 1){
             expression.operandA = expression.operandA.slice(0, -1);
@@ -109,7 +111,7 @@ function setOperand(event) {
     if(!expression.operator){
         // operandA
         if(Math.abs(expression.operandA) === Infinity || Math.abs(expression.operandA) > 1e14) return;
-        if(expression.operandA.includes(".") && expression.operandA.length > 8) return;
+        if(expression.operandA.includes(".") && (expression.operandA.length > 8 || event.target.textContent === ".")) return;
 
         let opA = expression.operandA + event.target.textContent;
         expression.operandA = opA;
@@ -120,7 +122,7 @@ function setOperand(event) {
         // operator and operandA set
         // this is operandB
         if(Math.abs(expression.operandB) === Infinity ||  Math.abs(expression.operandB) > 1e14) return;
-        if(expression.operandB.includes(".") && expression.operandB.length > 8) return;
+        if(expression.operandB.includes(".")  && (expression.operandB.length > 8 || event.target.textContent === ".")) return;
         expression.operandB += event.target.textContent;
         display.textContent += event.target.textContent;
     }
@@ -144,6 +146,10 @@ function executeOperation(event){
     }
 
     if(Math.abs(result) > 10e14) result = result.toPrecision(8);
+    if(result.toString().includes(".") && result.toString().length > 5) {
+        console.log("Large decimal point");
+        result = result.toPrecision(5);
+    }
     console.log(result);
 
     expression.operandA = `${result}`;
@@ -169,14 +175,31 @@ function buildExpression(event) {
         if(event.target.textContent !== "="){
             expression.operator = event.target.textContent;
             display.textContent += ` ${expression.operator} `;
-            toggleDecimalButton();
         }
         return;
     }
     // at this stage, we have both operands and an operator
-    toggleDecimalButton();
-
     executeOperation(event);
+}
+
+function runKeyPress(event) {
+    const operations = new Set(["/", "*", "-", "+", "=", "Enter"])
+    let newEvent = {
+        target: {
+            textContent: "",
+        }
+    }
+    if(+event.key && event.code != "Space" || event.key === "." || event.key === "0"){
+        newEvent.target.textContent = event.key;
+        setOperand(newEvent);
+    } else if(operations.has(event.key)){
+        if(event.key === "Enter") newEvent.target.textContent = "=";
+        else newEvent.target.textContent = event.key;
+        buildExpression(newEvent)
+
+    } else if(event.key === "Backspace" || event.key === "Delete"){
+        deleteKey(newEvent);
+    }
 }
 
 const numberButtons = document.querySelectorAll("button.number");
@@ -193,10 +216,12 @@ const clearButton = document.querySelector("button.clear");
 clearButton.addEventListener('click', clearDisplay);
 
 const decimalButton = document.querySelector(".number.decimal");
-decimalButton.addEventListener('click', (event) => event.target.disabled = true);
+// decimalButton.addEventListener('click', (event) => event.target.disabled = true);
 
 const deleteButton = document.querySelector(".delete");
 deleteButton.addEventListener('click', deleteKey);
 
 const allButtons = document.querySelectorAll("button");
+
+document.addEventListener('keydown', runKeyPress);
 

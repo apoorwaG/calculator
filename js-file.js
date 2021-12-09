@@ -145,12 +145,12 @@ function executeOperation(event){
         return;
     }
 
-    if(Math.abs(result) > 10e14) result = result.toPrecision(8);
     if(result.toString().includes(".") && result.toString().length > 5) {
         console.log("Large decimal point");
         result = result.toPrecision(5);
     }
-    console.log(result);
+
+    if(result.toString().length > 10) result = (+result).toPrecision(8);
 
     expression.operandA = `${result}`;
     if(event.target.textContent === "="){
